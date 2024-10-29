@@ -52,14 +52,22 @@ bot.on('message', async (msg) => {
     } else if (text.startsWith('/coursename')) {
         const courseName = text.replace('/coursename', '').trim();
 
-        let existingCourse = await Course.findOne({ CourseName: courseName });
+        try {
+            let existingCourse = await Course.findOne({ CourseName: courseName });
 
-        if (existingCourse) {
-            existingCourse.CourseList.forEach((courseLink) => {
-                bot.sendMessage(chatId, `${courseLink}`);
-            });
-        } else {
-            bot.sendMessage(chatId, "we don't have that in our database");
+            if (existingCourse) {
+                if (existingCourse.CourseList.length > 0) {
+                    existingCourse.CourseList.forEach((courseLink) => {
+                        bot.sendMessage(chatId, `${courseLink}`);
+                    });
+                } else {
+                    bot.sendMessage(chatId, "No links found for this course.");
+                }
+            } else {
+                bot.sendMessage(chatId, "We don't have that course in our database.");
+            }
+        } catch (error) {
+            bot.sendMessage(chatId, "An error occurred while retrieving the course.");
         }
     } else {
         bot.sendMessage(chatId, "Refer to our documentation /help");
